@@ -7,7 +7,7 @@ main_bp = Blueprint("main", __name__)
 @main_bp.route('/')
 def main_page():
     device_config = current_app.config['DEVICE_CONFIG']
-    return render_template('inky.html', config=device_config.get_config(), plugins=device_config.get_plugins())
+    return render_template('inky.html', config=device_config.get_config(), plugins=device_config.get_visible_plugins(), hidden_plugins=device_config.get_hidden_plugins())
 
 @main_bp.route('/api/current_image')
 def get_current_image():
@@ -56,3 +56,18 @@ def save_plugin_order():
     device_config.set_plugin_order(order)
 
     return jsonify({"success": True})
+
+
+@main_bp.route('/api/plugin/<plugin_id>/toggle_visibility', methods=['POST'])
+def toggle_plugin_visibility(plugin_id):
+    """Toggle the visibility of a plugin."""
+    device_config = current_app.config['DEVICE_CONFIG']
+
+    # Check if plugin exists
+    if not device_config.get_plugin(plugin_id):
+        return jsonify({"error": "Plugin not found"}), 404
+
+    device_config.toggle_plugin_visibility(plugin_id)
+    is_hidden = device_config.is_plugin_hidden(plugin_id)
+
+    return jsonify({"success": True, "hidden": is_hidden})

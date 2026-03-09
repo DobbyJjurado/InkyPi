@@ -91,6 +91,30 @@ class Config:
         """Sets the custom plugin display order."""
         self.update_value('plugin_order', order, write=True)
 
+    def toggle_plugin_visibility(self, plugin_id):
+        """Toggle the visibility of a plugin (hidden or shown)."""
+        hidden_plugins = self.config.get('hidden_plugins', [])
+        if plugin_id in hidden_plugins:
+            hidden_plugins.remove(plugin_id)
+        else:
+            hidden_plugins.append(plugin_id)
+        self.update_value('hidden_plugins', hidden_plugins, write=True)
+
+    def is_plugin_hidden(self, plugin_id):
+        """Check if a plugin is hidden."""
+        hidden_plugins = self.config.get('hidden_plugins', [])
+        return plugin_id in hidden_plugins
+
+    def get_visible_plugins(self):
+        """Returns the list of visible plugins (excluding hidden ones)."""
+        all_plugins = self.get_plugins()
+        return [p for p in all_plugins if not self.is_plugin_hidden(p['id'])]
+
+    def get_hidden_plugins(self):
+        """Returns the list of hidden plugins."""
+        all_plugins = self.get_plugins()
+        return [p for p in all_plugins if self.is_plugin_hidden(p['id'])]
+
     def get_plugin(self, plugin_id):
         """Finds and returns a plugin config by its ID."""
         return next((plugin for plugin in self.plugins_list if plugin['id'] == plugin_id), None)

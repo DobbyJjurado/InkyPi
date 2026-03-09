@@ -3,7 +3,10 @@
 # set up logging
 import os, logging.config
 
-from pi_heif import register_heif_opener
+try:
+    from pi_heif import register_heif_opener
+except ImportError:
+    pass  # pi_heif not available, HEIF support disabled
 
 logging.config.fileConfig(os.path.join(os.path.dirname(__file__), 'config', 'logging.conf'))
 

@@ -1116,6 +1116,15 @@ html[data-theme="dark"] .settings-button.dark-mode-toggle::before {
     justify-items: stretch;
 }
 
+.plugins-container .plugin-item-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
 .plugins-container .plugin-item {
     display: flex;
     flex-direction: column;
@@ -1128,8 +1137,9 @@ html[data-theme="dark"] .settings-button.dark-mode-toggle::before {
     border: 1px solid var(--border-color);
     box-sizing: border-box;
     width: 100%;
-    justify-self: stretch;
+    flex-grow: 1;
     transition: background 0.2s, border-color 0.2s;
+    position: relative;
 }
 
 .plugins-container .plugin-item:hover {
@@ -1192,22 +1202,24 @@ html[data-theme="dark"] .settings-button.dark-mode-toggle::before {
 }
 
 /* Sorting Mode */
-.plugins-container.sorting .plugin-item {
+.plugins-container.sorting .plugin-item-wrapper {
     cursor: grab;
-    border-style: dashed;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 6px;
 }
 
-.plugins-container.sorting .plugin-item:hover {
+.plugins-container.sorting .plugin-item-wrapper:hover {
     border-color: #4CAF50;
     background: rgba(76, 175, 80, 0.05);
 }
 
-.plugins-container.sorting .plugin-item.dragging {
+.plugins-container.sorting .plugin-item-wrapper.dragging {
     opacity: 0.5;
     cursor: grabbing;
 }
 
-.plugins-container.sorting .plugin-item.drag-over {
+.plugins-container.sorting .plugin-item-wrapper.drag-over {
     border-color: #2196F3;
     border-style: solid;
     background: rgba(33, 150, 243, 0.1);
@@ -1222,4 +1234,165 @@ html[data-theme="dark"] .settings-button.dark-mode-toggle::before {
 
 .sort-hint.visible {
     display: block;
+}
+
+/* Plugin Item Wrapper with Hide/Show Button */
+.plugin-item-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+.plugins-container .plugin-item-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+.plugin-item-wrapper .plugin-item {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex-grow: 1;
+}
+
+/* Hide/Show Button Styling */
+.plugin-hide-btn,
+.plugin-show-btn {
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.plugin-hide-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, pointer-events 0.2s ease;
+}
+
+.plugin-item-wrapper:hover .plugin-hide-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.plugin-hide-btn:hover,
+.plugin-show-btn:hover {
+    background-color: rgba(200, 0, 0, 0.9);
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.plugin-show-btn {
+    background-color: rgba(0, 128, 0, 0.8);
+    margin-left: auto;
+}
+
+.plugin-show-btn:hover {
+    background-color: rgba(0, 100, 0, 0.9);
+}
+
+/* Hidden Plugins Section */
+.hidden-plugins-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+}
+
+.hidden-plugins-section details {
+    width: 100%;
+}
+
+.hidden-plugins-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 8px;
+    user-select: none;
+    transition: color 0.3s ease;
+}
+
+.hidden-plugins-section summary:hover {
+    color: var(--text-primary);
+}
+
+.hidden-plugins-section details[open] summary {
+    margin-bottom: 10px;
+}
+
+/* Hidden Plugins Container */
+.hidden-plugins-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.hidden-plugins-container.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hidden-plugins-container .plugin-item-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.hidden-plugins-container .hidden-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    border: none;
+    flex-grow: 1;
+    opacity: 0.6;
+}
+
+.hidden-plugins-container .hidden-item .icon-image {
+    width: 32px;
+    height: 32px;
+}
+
+.hidden-plugins-container .hidden-item .plugin-name {
+    margin-top: 0;
+    font-size: 14px;
+    text-align: left;
 }

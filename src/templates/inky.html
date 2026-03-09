@@ -93,20 +93,106 @@
 
         <div class="plugins-container" id="pluginsContainer">
             {% for plugin in plugins %}
-            <a href="{{ url_for('plugin.plugin_page', plugin_id=plugin.id) }}"
-               class="plugin-item"
-               data-plugin-id="{{ plugin.id }}"
-               title="{{ plugin.display_name }}"
-               draggable="false">
-                <img src="{{ url_for('plugin.image', plugin_id=plugin.id, filename='icon.png') }}"
-                     alt="{{ plugin.display_name }}"
-                     class="icon-image">
-                <span class="plugin-name">{{ plugin.display_name }}</span>
-            </a>
+            <div class="plugin-item-wrapper" data-plugin-id="{{ plugin.id }}">
+                <a href="{{ url_for('plugin.plugin_page', plugin_id=plugin.id) }}"
+                   class="plugin-item"
+                   data-plugin-id="{{ plugin.id }}"
+                   title="{{ plugin.display_name }}"
+                   draggable="false">
+                    <img src="{{ url_for('plugin.image', plugin_id=plugin.id, filename='icon.png') }}"
+                         alt="{{ plugin.display_name }}"
+                         class="icon-image">
+                    <span class="plugin-name">{{ plugin.display_name }}</span>
+                </a>
+                <button class="plugin-hide-btn" data-plugin-id="{{ plugin.id }}" title="Hide plugin">✕</button>
+            </div>
             {% endfor %}
         </div>
 
+        {% if hidden_plugins %}
+        <div class="hidden-plugins-section">
+            <details>
+                <summary class="hidden-plugins-title">Hidden Plugins ({{ hidden_plugins|length }})</summary>
+                <div class="hidden-plugins-container" id="hiddenPluginsContainer">
+                    {% for plugin in hidden_plugins %}
+                    <div class="plugin-item-wrapper hidden" data-plugin-id="{{ plugin.id }}">
+                        <div class="plugin-item hidden-item" title="{{ plugin.display_name }}">
+                            <img src="{{ url_for('plugin.image', plugin_id=plugin.id, filename='icon.png') }}"
+                                 alt="{{ plugin.display_name }}"
+                                 class="icon-image">
+                            <span class="plugin-name">{{ plugin.display_name }}</span>
+                        </div>
+                        <button class="plugin-show-btn" data-plugin-id="{{ plugin.id }}" title="Show plugin">✓</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+        </div>
+        {% endif %}
+
         <script>
+            // Hide/Show plugin functionality
+            async function togglePluginVisibility(pluginId) {
+                try {
+                    console.log('Toggling visibility for plugin:', pluginId);
+                    const url = `{{ url_for('main.toggle_plugin_visibility', plugin_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', pluginId);
+                    console.log('Fetching:', url);
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    console.log('Response status:', response.status);
+                    if (response.ok) {
+                        console.log('Success! Reloading page...');
+                        location.reload();
+                    } else {
+                        console.error('Failed to toggle plugin visibility. Status:', response.status);
+                        const text = await response.text();
+                        console.error('Response:', text);
+                    }
+                } catch (error) {
+                    console.error('Error toggling plugin visibility:', error);
+                }
+            }
+
+            // Attach event listeners when DOM is ready
+            function attachPluginButtonListeners() {
+                console.log('Attaching plugin button listeners');
+                
+                // Add click handlers for hide buttons
+                document.querySelectorAll('.plugin-hide-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        console.log('Hide button clicked');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const pluginId = btn.dataset.pluginId;
+                        console.log('Plugin ID:', pluginId);
+                        togglePluginVisibility(pluginId);
+                    });
+                });
+
+                // Add click handlers for show buttons
+                document.querySelectorAll('.plugin-show-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        console.log('Show button clicked');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const pluginId = btn.dataset.pluginId;
+                        console.log('Plugin ID:', pluginId);
+                        togglePluginVisibility(pluginId);
+                    });
+                });
+            }
+
+            // Attach listeners when DOM is fully loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attachPluginButtonListeners);
+            } else {
+                attachPluginButtonListeners();
+            }
+
             // View mode (grid/list)
             const viewToggle = document.getElementById('viewToggle');
             const pluginsContainer = document.getElementById('pluginsContainer');
@@ -143,7 +229,7 @@
                 sortHint.classList.add('visible');
                 pluginsContainer.classList.add('sorting');
 
-                document.querySelectorAll('.plugin-item').forEach(item => {
+                document.querySelectorAll('.plugin-item-wrapper').forEach(item => {
                     item.draggable = true;
                     item.addEventListener('dragstart', handleDragStart);
                     item.addEventListener('dragend', handleDragEnd);
@@ -161,7 +247,7 @@
                 sortHint.classList.remove('visible');
                 pluginsContainer.classList.remove('sorting');
 
-                document.querySelectorAll('.plugin-item').forEach(item => {
+                document.querySelectorAll('.plugin-item-wrapper').forEach(item => {
                     item.draggable = false;
                     item.removeEventListener('dragstart', handleDragStart);
                     item.removeEventListener('dragend', handleDragEnd);
@@ -189,7 +275,7 @@
 
             function handleDragEnd(e) {
                 this.classList.remove('dragging');
-                document.querySelectorAll('.plugin-item').forEach(item => {
+                document.querySelectorAll('.plugin-item-wrapper').forEach(item => {
                     item.classList.remove('drag-over');
                 });
             }
