@@ -1,5 +1,6 @@
 {
-    "name": "InkyPi Development",
+    "name": "Patricia",
+    "startup": true,
     "display_type": "mock",
     "resolution": [
         800,
@@ -10,13 +11,13 @@
         "calendar",
         "clock",
         "countdown",
-        "image_album",
         "image_folder",
         "image_upload",
         "image_url",
         "screenshot",
         "todo_list",
-        "year_progress"
+        "year_progress",
+        "weather"
     ],
     "playlist_config": {
         "playlists": [
@@ -25,16 +26,27 @@
                 "start_time": "00:00",
                 "end_time": "24:00",
                 "plugins": [],
-                "current_plugin_index": null
+                "current_plugin_index": 0
             }
         ],
-        "active_playlist": null
+        "active_playlist": "Default"
     },
     "refresh_info": {
-        "refresh_time": "2026-04-18T09:30:22.507853+00:00",
-        "image_hash": "32f5b1adb3845d001f15806bdd372a7d903a29a8d8114926f4aa6791462203cf",
+        "refresh_time": "2026-04-18T13:29:14.397323+02:00",
+        "image_hash": "e68024040181ca28aa6a0d14f5d5585407a4cfe80053cffe74f0a56509b7ca5a",
         "refresh_type": "Manual Update",
-        "plugin_id": "image_folder"
+        "plugin_id": "image_upload"
     },
-    "hidden_plugins": []
+    "hidden_plugins": [],
+    "inverted_image": null,
+    "log_system_stats": null,
+    "timezone": "Europe/Madrid",
+    "time_format": "24h",
+    "plugin_cycle_interval_seconds": 60,
+    "image_settings": {
+        "saturation": 1.0,
+        "brightness": 1.0,
+        "sharpness": 1.0,
+        "contrast": 1.0
+    }
 }

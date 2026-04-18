@@ -5,6 +5,7 @@ import subprocess
 
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+import qrcode
 
 logger = logging.getLogger(__name__)
 
@@ -104,36 +105,56 @@ def get_fonts():
 def get_font_path(font_name):
     return resolve_path(os.path.join("static", "fonts", FONTS[font_name]))
 
-def generate_startup_image(dimensions=(800,480)):
-    bg_color = (255,255,255)
-    text_color = (0,0,0)
+def generate_startup_image(port,dimensions=(800, 480)):
+    bg_color = (255, 255, 255)
+    text_color = (0, 0, 0)
     width, height = dimensions
+    image_path = resolve_path(os.path.join("static", "images", "patripi.png"))
+    
+    base_img = Image.open(image_path).convert("RGBA")
+    base_img.thumbnail((width, height * 0.85))
+    img_w, img_h = base_img.size
 
+    canvas = Image.new("RGBA", dimensions, bg_color)
+    
+    offset_x = (width - img_w) // 2
+    offset_y = (height // 50) 
+    canvas.paste(base_img, (offset_x, offset_y), base_img)
+
+    image_draw = ImageDraw.Draw(canvas)
     hostname = socket.gethostname()
     ip = get_ip_address()
 
-    image = Image.new("RGBA", dimensions, bg_color)
-    image_draw = ImageDraw.Draw(image)
+    qr_url = f"http://{ip}:{port}"
+    qr = qrcode.QRCode(box_size=10, border=2)
+    qr.add_data(qr_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
+    
+    qr_side = int(height * 0.15)
+    qr_img = qr_img.resize((qr_side, qr_side))
 
-    title_font_size = width * 0.145
-    image_draw.text((width/2, height/2), "inkypi", anchor="mm", fill=text_color, font=get_font("Jost", title_font_size))
+    qr_offset_x = (width - qr_side)
+    qr_offset_y = height - qr_side 
 
-    text = f"To get started, visit http://{hostname}.local"
-    text_font_size = width * 0.032
+    canvas.paste(qr_img, (qr_offset_x, qr_offset_y), qr_img)
 
-    # Draw the instructions
-    y_text = height * 3 / 4
-    image_draw.text((width/2, y_text), text, anchor="mm", fill=text_color, font=get_font("Jost", text_font_size))
+    text_font_size = int(width * 0.026)
+    font = get_font("Jost", text_font_size)
 
-    # Draw the IP on a line below
-    ip_text = f"or http://{ip}"
-    ip_text_font_size = width * 0.032
-    bbox = image_draw.textbbox((0, 0), text, font=get_font("Jost", text_font_size))
-    text_height = bbox[3] - bbox[1]
-    ip_y = y_text + text_height * 1.35
-    image_draw.text((width/2, ip_y), ip_text, anchor="mm", fill=text_color, font=get_font("Jost", ip_text_font_size))
+    text_start_y = offset_y + img_h + 20 
+    
+    instruction = f"FELICES 33 PATRICHU!"
+    ip_text = f"Visita http://{hostname}.local o http://{ip}"
 
-    return image
+    image_draw.text((width/2, text_start_y), instruction, anchor="mm", fill=text_color, font=font)
+    
+    bbox = image_draw.textbbox((0, 0), instruction, font=font)
+    line_height = bbox[3] - bbox[1]
+    
+    image_draw.text((width/2, text_start_y + line_height + 10), ip_text, anchor="mm", fill=text_color, font=font)
+
+    return canvas
 
 def parse_form(request_form):
     request_dict = request_form.to_dict()
