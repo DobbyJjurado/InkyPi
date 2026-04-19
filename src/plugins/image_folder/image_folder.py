@@ -7,6 +7,7 @@ import random
 from utils.image_utils import pad_image_blur
 
 logger = logging.getLogger(__name__)
+IMAGE_FOLDER_ENV = "INKYPI_IMAGE_FOLDER"
 
 def list_files_in_folder(folder_path):
     """Return a list of image file paths in the given folder, excluding hidden files."""
@@ -20,13 +21,27 @@ def list_files_in_folder(folder_path):
     return image_files
 
 class ImageFolder(BasePlugin):
+    def generate_settings_template(self):
+        """Override to include the image folder path from environment variable."""
+        template_params = super().generate_settings_template()
+        
+        # Get the image folder path from environment variable
+        folder_path = os.getenv(IMAGE_FOLDER_ENV)
+        if folder_path:
+            folder_path = os.path.expanduser(folder_path)
+        
+        template_params['image_folder_path'] = folder_path
+        return template_params
+    
     def generate_image(self, settings, device_config):
         logger.info("=== Image Folder Plugin: Starting image generation ===")
 
-        folder_path = settings.get('folder_path')
+        folder_path = os.getenv(IMAGE_FOLDER_ENV)
         if not folder_path:
-            logger.error("No folder path provided in settings")
-            raise RuntimeError("Folder path is required.")
+            logger.error(f"Environment variable {IMAGE_FOLDER_ENV} is not set")
+            raise RuntimeError(f"Image folder environment variable {IMAGE_FOLDER_ENV} is not configured.")
+
+        folder_path = os.path.expanduser(folder_path)
 
         if not os.path.exists(folder_path):
             logger.error(f"Folder does not exist: {folder_path}")

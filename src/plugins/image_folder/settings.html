@@ -22,8 +22,12 @@
 </div>
 
 <div class="form-group">
-    <label for="url" class="form-label">Folder path:</label>
-    <input type="text" id="folder_path" name="folder_path" placeholder="Type something..." required class="form-input">
+    <label class="form-label" for="folderPath">Folder path:</label>
+    {% if image_folder_path %}
+        <p style="font-weight: 500; color: #333; margin: 8px 0; padding: 8px; background-color: #f5f5f5; border-radius: 4px; word-break: break-all;"><code>{{ image_folder_path }}</code></p>
+    {% else %}
+        <p style="font-style: italic; color: #d32f2f; margin: 8px 0;">⚠ Environment variable <code>INKYPI_IMAGE_FOLDER</code> is not configured.</p>
+    {% endif %}
 </div>
 
 
@@ -32,7 +36,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         let backgroundOption = "blur"
         if (loadPluginSettings) {
-            document.getElementById('folder_path').value = pluginSettings.folder_path;
             document.getElementById('padImage').checked = pluginSettings.padImage == 'false';
             document.getElementById('backgroundColor').value = pluginSettings.backgroundColor;
 
