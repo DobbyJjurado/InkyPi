@@ -32,10 +32,10 @@
         "active_playlist": "Default"
     },
     "refresh_info": {
-        "refresh_time": "2026-04-19T12:39:01.410586+02:00",
-        "image_hash": "6344124c4f742357622f6a75215165afd3391d387a0d01340c3ea9fb23d7594d",
+        "refresh_time": "2026-04-19T15:33:25.943207+02:00",
+        "image_hash": "bfbb6a0dcd32e10a2e5ec9e81303fafd1fd5e5d4206614616b1f0c5277dfcf05",
         "refresh_type": "Manual Update",
-        "plugin_id": "image_folder"
+        "plugin_id": "countdown"
     },
     "hidden_plugins": [],
     "inverted_image": null,

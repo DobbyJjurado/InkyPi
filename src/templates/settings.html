@@ -218,6 +218,33 @@
                            required 
                            class="form-input">
                 </div>
+
+                <!-- Storage Stats -->
+                {% if storage_stats and not storage_stats.error %}
+                <div class="form-group">
+                    <label class="form-label">Storage</label>
+                    <div style="margin: 10px 0; padding: 14px; width: 100%; background-color: #ffffff; border-radius: 16px; border: 1px solid #e0e0e0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                        <div style="margin-bottom: 14px; font-size: 0.95em; color: #333; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                            <span style="font-weight: 600;">Device storage</span>
+                            <span style="color: #666;">{{ storage_stats.free_space }} free of {{ storage_stats.total_space }}</span>
+                        </div>
+                        <div style="height: 20px; border-radius: 999px; background: #ebedf0; overflow: hidden; margin-bottom: 8px; width: 100%;">
+                            {% if storage_stats.image_folder_usage_percent %}
+                            <div style="width: {{ storage_stats.image_folder_usage_percent }}%; height: 100%; background: linear-gradient(90deg, #ff4444 0%, #cc0000 100%); float: left;"></div>
+                            {% endif %}
+                            <div style="width: {{ storage_stats.disk_used_percent - storage_stats.image_folder_usage_percent }}%; height: 100%; background: linear-gradient(90deg, #4f86ff 0%, #0066cc 100%); float: left;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; color: #555;">
+                            {% if storage_stats.image_folder_size %}
+                            <span>Images: {{ storage_stats.image_folder_size }}</span>
+                            {% endif %}
+                            <span>Used: {{ storage_stats.used_space }}</span>
+                            <span>{{ storage_stats.disk_used_percent }}%</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="form-group nowrap">
                     <!-- Orientation Dropdown -->
                     <div class="form-group">

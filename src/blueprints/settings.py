@@ -24,6 +24,53 @@ except ImportError:
         def __init__(self, *args, **kwargs):
             pass
 
+def _format_bytes(num_bytes):
+    """Format bytes as a human-readable string."""
+    for unit in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if num_bytes < 1024 or unit == 'TB':
+            return f"{num_bytes:.2f} {unit}"
+        num_bytes /= 1024
+
+def get_storage_stats():
+    """Get storage statistics for the device and image folder."""
+    import shutil
+    from plugins.image_folder.image_folder import list_files_in_folder, IMAGE_FOLDER_ENV
+    
+    stats = {}
+    
+    try:
+        # Get disk usage for root filesystem
+        usage = shutil.disk_usage('/')
+        stats['total_space'] = _format_bytes(usage.total)
+        stats['used_space'] = _format_bytes(usage.used)
+        stats['free_space'] = _format_bytes(usage.free)
+        stats['disk_used_percent'] = round((usage.used / usage.total) * 100, 1) if usage.total else 0
+        
+        # Get image folder usage
+        folder_path = os.getenv(IMAGE_FOLDER_ENV)
+        if folder_path:
+            folder_path = os.path.expanduser(folder_path)
+            if os.path.exists(folder_path) and os.path.isdir(folder_path):
+                total_size = 0
+                for image_path in list_files_in_folder(folder_path):
+                    try:
+                        total_size += os.path.getsize(image_path)
+                    except Exception:
+                        pass
+                
+                stats['image_folder_size'] = _format_bytes(total_size)
+                stats['image_folder_usage_percent'] = round((total_size / usage.total) * 100, 1) if usage.total else 0
+                stats['image_folder_path'] = folder_path
+            else:
+                stats['image_folder_error'] = 'Image folder not accessible'
+        else:
+            stats['image_folder_error'] = 'INKYPI_IMAGE_FOLDER not configured'
+            
+    except Exception as e:
+        logger.warning(f"Unable to collect storage stats: {e}")
+        stats['error'] = 'Unable to collect storage stats'
+    
+    return stats
 
 logger = logging.getLogger(__name__)
 settings_bp = Blueprint("settings", __name__)
@@ -32,7 +79,8 @@ settings_bp = Blueprint("settings", __name__)
 def settings_page():
     device_config = current_app.config['DEVICE_CONFIG']
     timezones = sorted(pytz.all_timezones_set)
-    return render_template('settings.html', device_settings=device_config.get_config(), timezones = timezones)
+    storage_stats = get_storage_stats()
+    return render_template('settings.html', device_settings=device_config.get_config(), timezones=timezones, storage_stats=storage_stats)
 
 @settings_bp.route('/save_settings', methods=['POST'])
 def save_settings():
