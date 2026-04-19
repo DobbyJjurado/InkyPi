@@ -32,10 +32,10 @@
         "active_playlist": "Default"
     },
     "refresh_info": {
-        "refresh_time": "2026-04-19T11:58:38.680373+02:00",
-        "image_hash": "1a4a9c37cc7d4c677b5c9b5c26572101167e7bec8004033271f58f29b1343b01",
+        "refresh_time": "2026-04-19T12:39:01.410586+02:00",
+        "image_hash": "6344124c4f742357622f6a75215165afd3391d387a0d01340c3ea9fb23d7594d",
         "refresh_type": "Manual Update",
-        "plugin_id": "todo_list"
+        "plugin_id": "image_folder"
     },
     "hidden_plugins": [],
     "inverted_image": null,
