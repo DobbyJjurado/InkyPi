@@ -41,4 +41,5 @@ class Countdown(BasePlugin):
         }
 
         image = self.render_image(dimensions, "countdown.html", "countdown.css", template_params)
+        print(image)
         return image

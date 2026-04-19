@@ -1,6 +1,6 @@
 {
     "name": "Patricia",
-    "startup": true,
+    "startup": false,
     "display_type": "mock",
     "resolution": [
         800,
@@ -26,16 +26,16 @@
                 "start_time": "00:00",
                 "end_time": "24:00",
                 "plugins": [],
-                "current_plugin_index": 0
+                "current_plugin_index": null
             }
         ],
         "active_playlist": "Default"
     },
     "refresh_info": {
-        "refresh_time": "2026-04-18T13:29:14.397323+02:00",
-        "image_hash": "e68024040181ca28aa6a0d14f5d5585407a4cfe80053cffe74f0a56509b7ca5a",
+        "refresh_time": "2026-04-19T11:58:38.680373+02:00",
+        "image_hash": "1a4a9c37cc7d4c677b5c9b5c26572101167e7bec8004033271f58f29b1343b01",
         "refresh_type": "Manual Update",
-        "plugin_id": "image_upload"
+        "plugin_id": "todo_list"
     },
     "hidden_plugins": [],
     "inverted_image": null,

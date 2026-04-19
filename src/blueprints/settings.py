@@ -6,6 +6,9 @@ import pytz
 import logging
 import io
 
+ADMIN_PASSWORD_ENV = "INKYPI_ADMIN_PASSWORD"
+from PIL import Image
+
 # Try to import cysystemd for journal reading (Linux only)
 try:
     from cysystemd.reader import JournalReader, JournalOpenMode, Rule
@@ -80,6 +83,35 @@ def save_settings():
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
     return jsonify({"success": True, "message": "Saved settings."})
+
+@settings_bp.route('/show-white-startup', methods=['POST'])
+def show_white_startup():
+    device_config = current_app.config['DEVICE_CONFIG']
+    display_manager = current_app.config['DISPLAY_MANAGER']
+
+    try:
+        dimensions = device_config.get_resolution()
+        image = Image.new("RGB", dimensions, color="white")
+        display_manager.display_image(image)
+        device_config.update_value("startup", True, write=True)
+    except Exception as e:
+        logger.exception("Failed to display white startup image")
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"success": True, "message": "White startup image displayed and startup enabled."})
+
+@settings_bp.route('/admin-auth', methods=['POST'])
+def admin_auth():
+    data = request.get_json() or {}
+    password = data.get('password', '')
+    expected = os.getenv(ADMIN_PASSWORD_ENV)
+
+    if not expected:
+        return jsonify({"error": "Administrator password is not configured."}), 500
+
+    if password == expected:
+        return jsonify({"success": True, "message": "Administrator mode enabled."})
+    return jsonify({"error": "Invalid administrator password."}), 403
 
 @settings_bp.route('/shutdown', methods=['POST'])
 def shutdown():

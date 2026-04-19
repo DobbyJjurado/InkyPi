@@ -97,7 +97,7 @@ if __name__ == '__main__':
         logger.info("Startup flag is set, displaying startup image")
         img = generate_startup_image(PORT, device_config.get_resolution())
         display_manager.display_image(img)
-        #device_config.update_value("startup", False, write=True)
+        device_config.update_value("startup", False, write=True)
 
     try:
         # Run the Flask app

@@ -91,14 +91,15 @@ def compute_image_hash(image):
 def take_screenshot_html(html_str, dimensions, timeout_ms=None):
     image = None
     try:
-        # Create a temporary HTML file
-        with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as html_file:
+        temp_dir = os.path.expanduser("~/tmp_inkypi")
+        os.makedirs(temp_dir, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(suffix=".html", delete=False, dir=temp_dir) as html_file:
             html_file.write(html_str.encode("utf-8"))
             html_file_path = html_file.name
 
         image = take_screenshot(html_file_path, dimensions, timeout_ms)
 
-        # Remove html file
         os.remove(html_file_path)
 
     except Exception as e:
@@ -126,8 +127,10 @@ def take_screenshot(target, dimensions, timeout_ms=None):
             logger.error("No Chromium-based browser found. Install chromium, chromium-headless-shell, or chrome.")
             return None
 
-        # Create a temporary output file for the screenshot
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as img_file:
+        temp_dir = os.path.expanduser("~/tmp_inkypi")
+        os.makedirs(temp_dir, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False, dir=temp_dir) as img_file:
             img_file_path = img_file.name
 
         command = [
@@ -155,16 +158,13 @@ def take_screenshot(target, dimensions, timeout_ms=None):
             command.append(f"--timeout={timeout_ms}")
         result = subprocess.run(command, capture_output=True, check=False)
 
-        # Check if the process failed or the output file is missing
         if result.returncode != 0 or not os.path.exists(img_file_path):
             logger.error(f"Failed to take screenshot (return code: {result.returncode})")
             return None
 
-        # Load the image using PIL
         with Image.open(img_file_path) as img:
             image = img.copy()
 
-        # Remove image files
         os.remove(img_file_path)
 
     except Exception as e:

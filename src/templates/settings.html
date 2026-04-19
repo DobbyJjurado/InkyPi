@@ -90,11 +90,97 @@
         }
 
 
+        async function handleWhiteStartup() {
+            try {
+                const response = await fetch("{{ url_for('settings.show_white_startup') }}", {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showResponseModal('success', result.message);
+                } else {
+                    showResponseModal('failure', `Error! ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResponseModal('failure', 'An error occurred while displaying the white startup image.');
+            }
+        }
+
+        async function handleAdminMode() {
+            const adminButton = document.getElementById('adminModeButton');
+            if (isAdminUnlocked()) {
+                localStorage.setItem('inkypi-admin-unlocked', 'false');
+                updateAdminUI();
+                showResponseModal('success', 'Administrator mode disabled.');
+                return;
+            }
+
+            const password = prompt('Administrator password:');
+            if (password === null) return;
+
+            try {
+                const response = await fetch("{{ url_for('settings.admin_auth') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('inkypi-admin-unlocked', 'true');
+                    updateAdminUI();
+                    showResponseModal('success', result.message);
+                } else {
+                    localStorage.setItem('inkypi-admin-unlocked', 'false');
+                    updateAdminUI();
+                    showResponseModal('failure', `Error! ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResponseModal('failure', 'An error occurred while trying to enable administrator mode.');
+            }
+        }
+
+        function isAdminUnlocked() {
+            return localStorage.getItem('inkypi-admin-unlocked') === 'true';
+        }
+
+        function updateAdminUI() {
+            const whiteStartupButton = document.getElementById('whiteStartupButton');
+            const adminButton = document.getElementById('adminModeButton');
+            const downloadLogsButton = document.getElementById('downloadLogsButton');
+            const rebootButton = document.getElementById('rebootButton');
+            const shutdownButton = document.getElementById('shutdownButton');
+            const isAdmin = isAdminUnlocked();
+
+            if (adminButton) {
+                adminButton.textContent = isAdmin ? '🔓 Admin Off' : '🔒 Admin';
+            }
+
+            if (whiteStartupButton) {
+                whiteStartupButton.style.display = isAdmin ? 'inline-block' : 'none';
+            }
+            if (downloadLogsButton) {
+                downloadLogsButton.style.display = isAdmin ? 'inline-block' : 'none';
+            }
+            if (rebootButton) {
+                rebootButton.style.display = isAdmin ? 'inline-block' : 'none';
+            }
+            if (shutdownButton) {
+                shutdownButton.style.display = isAdmin ? 'inline-block' : 'none';
+            }
+        }
+
         function updateSliderValue(slider) {
             const valueDisplay = document.getElementById(`${slider.id}-value`);
             valueDisplay.textContent = parseFloat(slider.value).toFixed(1);
         }
-        document.addEventListener('DOMContentLoaded', populateIntervalFields);
+        document.addEventListener('DOMContentLoaded', () => {
+            populateIntervalFields();
+            updateAdminUI();
+        });
     </script>
 </head>
 <body>
@@ -109,9 +195,11 @@
                     <h1 class="app-title">Settings</h1>
                 </div>
                 <div>
-                    <a class="header-button" style="text-decoration: none; background-color: #2c66b1; color: #fff;" href="{{ url_for('settings.download_logs', hours=24) }}" download>Download Logs</a>
-                    <button class="header-button" style="background-color: #FFD600; color: #333;" onclick="handleShutdown(true)">Reboot</button>
-                    <button class="header-button" style="background-color: #E53935; color: #fff;" onclick="handleShutdown(false)">Shutdown</button>
+                    <button id="adminModeButton" class="header-button" style="background-color: #333; color: #fff; border: 1px solid #ccc;" onclick="handleAdminMode()">🔒 Admin</button>
+                    <a id="downloadLogsButton" class="header-button" style="display:none; text-decoration: none; background-color: #2c66b1; color: #fff;" href="{{ url_for('settings.download_logs', hours=24) }}" download>Download Logs</a>
+                    <button id="whiteStartupButton" class="header-button" style="display:none; background-color: #FFFFFF; color: #333; border: 1px solid #ccc;" onclick="handleWhiteStartup()">White Startup</button>
+                    <button id="rebootButton" class="header-button" style="display:none; background-color: #FFD600; color: #333;" onclick="handleShutdown(true)">Reboot</button>
+                    <button id="shutdownButton" class="header-button" style="display:none; background-color: #E53935; color: #fff;" onclick="handleShutdown(false)">Shutdown</button>
                 </div>
             </div>
         </div>
