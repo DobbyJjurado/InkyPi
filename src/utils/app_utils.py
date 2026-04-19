@@ -145,7 +145,7 @@ def generate_startup_image(port,dimensions=(800, 480)):
     text_start_y = offset_y + img_h + 20 
     
     instruction = f"FELICES 33 PATRICHU!"
-    ip_text = f"Visita http://{hostname}.local o http://{ip}"
+    ip_text = f"Escanea el código QR para empezar a usarme ----->"
 
     image_draw.text((width/2, text_start_y), instruction, anchor="mm", fill=text_color, font=font)
     

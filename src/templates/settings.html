@@ -17,6 +17,11 @@
     <script src="{{ url_for('static', filename='scripts/dark_mode.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/response_modal.js') }}"></script>
     <script>
+        // Flags to prevent multiple clicks on critical operations
+        let isShutdownInProgress = false;
+        let isRebootInProgress = false;
+        let isWhiteStartupInProgress = false;
+
         async function handleAction() {
             const form = document.querySelector('.settings-form');
             const formData = new FormData(form);
@@ -73,24 +78,81 @@
         }
 
         async function handleShutdown(reboot) {
+            // Prevent multiple clicks
+            if ((reboot && isRebootInProgress) || (!reboot && isShutdownInProgress)) {
+                return;
+            }
+
+            // Set the appropriate flag and disable button
             if (reboot) {
+                isRebootInProgress = true;
+                const rebootButton = document.getElementById('rebootButton');
+                if (rebootButton) {
+                    rebootButton.disabled = true;
+                    rebootButton.style.opacity = '0.6';
+                    rebootButton.style.cursor = 'not-allowed';
+                }
                 showResponseModal('success', 'The system is rebooting. The UI will be unavailable until the reboot is complete.');
             } else {
+                isShutdownInProgress = true;
+                const shutdownButton = document.getElementById('shutdownButton');
+                if (shutdownButton) {
+                    shutdownButton.disabled = true;
+                    shutdownButton.style.opacity = '0.6';
+                    shutdownButton.style.cursor = 'not-allowed';
+                }
                 showResponseModal('success', 'The system is shutting down. The UI will remain unavailable until it is manually restarted.');
             }
+
             await new Promise(resolve => setTimeout(resolve, 1000));
             // we cannot await a response here
-            await fetch("{{ url_for('settings.shutdown') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({reboot: reboot})
-            });
+            try {
+                await fetch("{{ url_for('settings.shutdown') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({reboot: reboot})
+                });
+            } catch (error) {
+                // Re-enable button if request fails
+                if (reboot) {
+                    isRebootInProgress = false;
+                    const rebootButton = document.getElementById('rebootButton');
+                    if (rebootButton) {
+                        rebootButton.disabled = false;
+                        rebootButton.style.opacity = '1';
+                        rebootButton.style.cursor = 'pointer';
+                    }
+                } else {
+                    isShutdownInProgress = false;
+                    const shutdownButton = document.getElementById('shutdownButton');
+                    if (shutdownButton) {
+                        shutdownButton.disabled = false;
+                        shutdownButton.style.opacity = '1';
+                        shutdownButton.style.cursor = 'pointer';
+                    }
+                }
+                showResponseModal('failure', 'Failed to execute the command. Please try again.');
+                console.error('Error:', error);
+            }
         }
 
 
         async function handleWhiteStartup() {
+            // Prevent multiple clicks
+            if (isWhiteStartupInProgress) {
+                return;
+            }
+
+            isWhiteStartupInProgress = true;
+            const whiteStartupButton = document.getElementById('whiteStartupButton');
+            if (whiteStartupButton) {
+                whiteStartupButton.disabled = true;
+                whiteStartupButton.style.opacity = '0.6';
+                whiteStartupButton.style.cursor = 'not-allowed';
+            }
+
             try {
                 const response = await fetch("{{ url_for('settings.show_white_startup') }}", {
                     method: 'POST'
@@ -104,6 +166,14 @@
             } catch (error) {
                 console.error('Error:', error);
                 showResponseModal('failure', 'An error occurred while displaying the white startup image.');
+            } finally {
+                // Re-enable button after operation completes
+                isWhiteStartupInProgress = false;
+                if (whiteStartupButton) {
+                    whiteStartupButton.disabled = false;
+                    whiteStartupButton.style.opacity = '1';
+                    whiteStartupButton.style.cursor = 'pointer';
+                }
             }
         }
 

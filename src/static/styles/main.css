@@ -940,6 +940,16 @@ html[data-theme="dark"] .settings-button.dark-mode-toggle::before {
     background-color: var(--accent-hover);
 }
 
+.header-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.header-button:disabled:hover {
+    background-color: var(--accent-primary);
+}
+
 .hidden {
     display: none;
 }
